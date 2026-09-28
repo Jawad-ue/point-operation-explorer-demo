@@ -63,6 +63,15 @@ st.markdown(
         padding: 0.6rem 0.9rem 0.8rem 0.9rem;
         z-index: 999;
     }
+
+    @media (max-width: 768px) {
+        div[data-testid="stDeployButton"] { display: none; }
+
+        div[class*="st-key-footer_bar"] {
+            width: calc(100vw - 1rem);
+            padding-bottom: calc(0.8rem + env(safe-area-inset-bottom));
+        }
+    }
 </style>
 """,
     unsafe_allow_html=True,
