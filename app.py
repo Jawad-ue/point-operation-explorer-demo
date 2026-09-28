@@ -71,6 +71,10 @@ st.markdown(
             width: calc(100vw - 1rem);
             padding-bottom: calc(0.8rem + env(safe-area-inset-bottom));
         }
+        div[data-testid="stAppDeployButton"],
+            div[data-testid="stStatusWidget"] {
+            display: none !important;
+        }
     }
 </style>
 """,
