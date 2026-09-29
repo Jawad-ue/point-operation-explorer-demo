@@ -43,37 +43,58 @@ st.markdown(
     """
 <style>
     #MainMenu {visibility: hidden;}
-    .block-container { max-width: 880px; padding-top: 1rem; padding-bottom: 240px; }
-    div[data-testid="stMetric"] {
-        background: #F7F9FC; border-radius: 8px; padding: 0.4rem 0.6rem;
-        border: 1px solid #E5E9F0;
+    .block-container { max-width: 880px; padding-top: 1.2rem; padding-bottom: 260px; }
+
+    :root {
+        --pox-card-bg: #F7F9FC;
+        --pox-card-border: #E5E9F0;
+        --pox-bar-bg: #FFFFFF;
+        --pox-bar-border: #E5E9F0;
+        --pox-shadow: rgba(0,0,0,0.08);
     }
-    div[data-testid="stChatMessage"] { padding: 0.3rem 0; }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --pox-card-bg: #1E2530;
+            --pox-card-border: #333B47;
+            --pox-bar-bg: #1A1F27;
+            --pox-bar-border: #333B47;
+            --pox-shadow: rgba(0,0,0,0.35);
+        }
+    }
+
+    div[data-testid="stMetric"] {
+        background: var(--pox-card-bg);
+        border-radius: 8px;
+        padding: 0.4rem 0.6rem;
+        border: 1px solid var(--pox-card-border);
+    }
+    div[data-testid="stChatMessage"] { padding: 0.35rem 0; }
+    div[data-testid="stExpander"] {
+        border-radius: 10px;
+        border: 1px solid var(--pox-card-border);
+    }
 
     div[class*="st-key-footer_bar"] {
         position: fixed;
-        bottom: 0;
+        bottom: 60px;
         left: 50%;
         transform: translateX(-50%);
         width: min(880px, calc(100vw - 2rem));
-        background: var(--background-color, #FFFFFF);
-        border: 1px solid #E5E9F0;
-        border-radius: 14px 14px 0 0;
-        box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
-        padding: 0.6rem 0.9rem 0.8rem 0.9rem;
+        background: var(--pox-bar-bg);
+        border: 1px solid var(--pox-bar-border);
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -4px 16px var(--pox-shadow);
+        padding: 0.7rem 1rem 0.9rem 1rem;
         z-index: 999;
     }
-
-    @media (max-width: 768px) {
-        div[data-testid="stDeployButton"] { display: none; }
-
+    div[class*="st-key-footer_bar"] button {
+        border-radius: 10px !important;
+    }
+    @media (max-width: 640px) {
         div[class*="st-key-footer_bar"] {
-            width: calc(100vw - 1rem);
-            padding-bottom: calc(0.8rem + env(safe-area-inset-bottom));
-        }
-        div[data-testid="stAppDeployButton"],
-            div[data-testid="stStatusWidget"] {
-            display: none !important;
+            bottom: 68px;
+            padding: 0.55rem 0.6rem 0.75rem 0.6rem;
+            border-radius: 14px 14px 0 0;
         }
     }
 </style>
@@ -87,12 +108,12 @@ st.markdown(
 with st.sidebar:
     st.markdown("### 🤖 AI Assistant")
     provider = st.selectbox(
-        "Provider", ["Anthropic (Claude)", "OpenAI (GPT)", "Groq (Free)"], key="ai_provider"
+        "Provider", ["Groq (Free)", "Anthropic (Claude)", "OpenAI (GPT)"], key="ai_provider"
     )
     default_models = {
         "Anthropic (Claude)": "claude-sonnet-5",
         "OpenAI (GPT)": "gpt-6-astra",
-        "Groq (Free)": "llama-3.3-70b-versatile",
+        "Groq (Free)": "openai/gpt-oss-120b",
     }
     if "ai_model" not in st.session_state:
         st.session_state["ai_model"] = default_models[provider]
@@ -127,7 +148,7 @@ st.markdown("## 🖼️ Point Operation Explorer")
 # Bottom compose bar: attach, operation, parameters, apply, chat input
 # ----------------------------------------------------------------------
 with st.container(key="footer_bar"):
-    c1, c2, c3, c4 = st.columns([1, 3, 1.4, 1])
+    c1, c2, c3, c4 = st.columns([1, 3, 1.4, 1], gap="small")
 
     with c1:
         with st.popover("📎", use_container_width=True):
@@ -289,49 +310,53 @@ def render_transform_curve(op_: dict, params_: dict):
 
 
 def render_image_upload(entry: dict):
-    cols = st.columns([1, 3])
-    with cols[0]:
-        st.image(entry["pil_rgb"], width=120)
-    with cols[1]:
-        info = entry["info"]
-        st.markdown(f"**{info['filename']}** — {info['width']}×{info['height']}px, {info['original_mode']}")
+    with st.container(border=True):
+        cols = st.columns([1, 3])
+        with cols[0]:
+            st.image(entry["pil_rgb"], width=120)
+        with cols[1]:
+            info = entry["info"]
+            st.markdown(f"**{info['filename']}**")
+            st.caption(f"{info['width']}×{info['height']}px · {info['original_mode']}")
 
 
 def render_operation_result(entry: dict, idx: int):
     op_ = entry["op"]
-    st.markdown(f"**{entry['operation_name']}**  \n{op_['what']}")
-    if entry["params"]:
-        param_str = ", ".join(f"{k}={v}" for k, v in entry["params"].items())
-        st.caption(f"Parameters — {param_str}")
-    st.latex(op_["formula_latex"])
+    with st.container(border=True):
+        st.markdown(f"**{entry['operation_name']}**")
+        st.caption(op_["what"])
+        if entry["params"]:
+            param_str = ", ".join(f"{k}={v}" for k, v in entry["params"].items())
+            st.caption(f"Parameters — {param_str}")
+        st.latex(op_["formula_latex"])
 
-    bcol1, bcol2 = st.columns(2)
-    with bcol1:
-        st.image(entry["original_array"], caption="Before", use_container_width=True, clamp=True)
-    with bcol2:
-        st.image(entry["processed_array"], caption="After", use_container_width=True, clamp=True)
+        bcol1, bcol2 = st.columns(2, gap="small")
+        with bcol1:
+            st.image(entry["original_array"], caption="Before", use_container_width=True, clamp=True)
+        with bcol2:
+            st.image(entry["processed_array"], caption="After", use_container_width=True, clamp=True)
 
-    st.info(entry["change_summary"])
+        st.info(entry["change_summary"])
 
-    st.markdown("**How it works — the transformation curve:**")
-    render_transform_curve(op_, entry["params"])
+        st.markdown("**How it works — the transformation curve:**")
+        render_transform_curve(op_, entry["params"])
 
-    with st.expander("🔍 Detailed stats & pixel values"):
-        st.markdown("*Before*")
-        render_stats_row(entry["original_stats"])
-        st.markdown("*After*")
-        render_stats_row(entry["processed_stats"])
-        hcol1, hcol2 = st.columns(2)
-        with hcol1:
-            render_histogram(entry["original_array"], "Before")
-        with hcol2:
-            render_histogram(entry["processed_array"], "After")
-        st.table(
-            {
-                "Original (r)": [p[0] for p in entry["example_pairs"]],
-                "Transformed (s)": [p[1] for p in entry["example_pairs"]],
-            }
-        )
+        with st.expander("🔍 Detailed stats & pixel values"):
+            st.markdown("*Before*")
+            render_stats_row(entry["original_stats"])
+            st.markdown("*After*")
+            render_stats_row(entry["processed_stats"])
+            hcol1, hcol2 = st.columns(2, gap="small")
+            with hcol1:
+                render_histogram(entry["original_array"], "Before")
+            with hcol2:
+                render_histogram(entry["processed_array"], "After")
+            st.table(
+                {
+                    "Original (r)": [p[0] for p in entry["example_pairs"]],
+                    "Transformed (s)": [p[1] for p in entry["example_pairs"]],
+                }
+            )
 
 
 # ----------------------------------------------------------------------
