@@ -92,10 +92,21 @@ st.markdown(
     }
     @media (max-width: 640px) {
         div[class*="st-key-footer_bar"] {
-            bottom: 68px;
+            position: static;
+            left: auto;
+        bottom: auto;
+        transform: none;
+        width: 100%;
+        margin-top: 1rem;
             padding: 0.55rem 0.6rem 0.75rem 0.6rem;
-            border-radius: 14px 14px 0 0;
-        }
+            border-radius: 14px;
+            box-shadow: none;
+    }
+
+    .block-container {
+        padding-bottom: 2rem;
+    }
+}
     }
 </style>
 """,
