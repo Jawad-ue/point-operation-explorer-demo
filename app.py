@@ -43,7 +43,7 @@ st.markdown(
     """
 <style>
     #MainMenu {visibility: hidden;}
-    .block-container { max-width: 880px; padding-top: 1rem; padding-bottom: 190px; }
+    .block-container { max-width: 880px; padding-top: 1rem; padding-bottom: 240px; }
     div[data-testid="stMetric"] {
         background: #F7F9FC; border-radius: 8px; padding: 0.4rem 0.6rem;
         border: 1px solid #E5E9F0;
